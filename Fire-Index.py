@@ -1,6 +1,7 @@
 #!/usr/bin/env python3#
 
 import math
+import time
 
 #Create by Tsvetomir Gotsov
 #
@@ -16,6 +17,20 @@ daily_rain = input("Daily rain, mm: \n")
 daily_rain = int(daily_rain)
 
 #print (temperature,humidity,wind_speed,daily_rain)
+
+##############################################################################
+# Time
+t = time.time()
+tm = time.gmtime(t)
+mon = tm.tm_mon
+#print (mon)
+
+##############################################################################
+# Effective_daylengts for Sofia, Bulgaria 2014
+Effective_daylengts = [9.5, 10.4, 11.5, 13.5, 14.5, 15.16, 14.83, 13.5, 12.5, 11.5, 9.66, 9.16]
+Le = Effective_daylengts [mon - 1]
+#print(Le)
+
 ##############################################################################
 #Intial Spread Index
 
@@ -74,7 +89,7 @@ if Pr <0:
 else:
     Pr = P0
 #### Determinate Effective day length Code 2 in hours Le
-Le = 10
+#Le = 10
 minimum_value = -1.1
 #### Compute Logarithmic drainage speed Code 2
 if float(temperature) <= minimum_value:
@@ -99,7 +114,7 @@ if daily_rain > 2.8:
 #    daily_rain = real_rain_code_3
 
 # Compute Equivalent humidity of Code 3 of previous day
-
+D0=5 ## Temp value
 Q0 = 800*math.exp(-D0*0.0025) #Compute Equivalent humidity of Code 3 previos the rain
 Qr = Q0 + (3.937*real_rain_code_3) #Compute Equivalent humidity of Code 3 after the rain
 buffer_var7 = 800/Qr
