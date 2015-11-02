@@ -4,6 +4,7 @@ import math
 import time
 
 #Create by Tsvetomir Gotsov
+#Ruse, Bulgaria
 #
 #input variable
 
@@ -77,9 +78,43 @@ elif (m0 > 150) & (m0 <250):
 else:
     mr = m0
 print("mr = ", mr)
+# Compute Ed
+buffer_var1 = pow(humidity,0.679) * 0.942
+buffer_var2 = 11 * math.exp((humidity - 100)/10)
+buffer_var3 = 0.18*(21.1 - temperature)
+buffer_var4 = 1 - math.exp(-0.115 * humidity)
 
-
-
+Ed = buffer_var1 + buffer_var2 +(buffer_var3 * buffer_var4)
+print("Ed=",Ed)
+Ew = 0 # Trqbva da se premahne!
+if m0 > Ed:
+    buffer_var1 = pow(humidity/100,1.7)
+    buffer_var2 = 0.0694*pow(wind_speed,0.5)
+    buffer_var3 = pow(humidity/100,8)
+    k0 = 0.424 * (1 - buffer_var1) + (buffer_var2 * buffer_var3)
+    kd = k0*(0.581*math.exp(0.0365*temperature))
+    print("k0=",k0)
+    print("kd=",kd)
+    m = Ed + (m0 - Ed)*pow(10,-kd)
+print("m=",m)
+if m0 < Ed:
+    buffer_var1 = 0.618 * pow(humidity,0.753)
+    buffer_var2 = 10 * math.exp((humidity - 100)/10)
+    buffer_var3 = 0.18*(21.1 - temperature)*(1 - math.exp(-0.115*humidity))
+    Ew = buffer_var1 + buffer_var2 + buffer_var3
+if m0 < Ew:
+    buffer_var1 = (100 - humidity) / 100
+    buffer_var2 = 0.424 * (1 - pow(buffer_var1, 1.7))
+    buffer_var3 = 0.0694 * pow(wind_speed,0.5)
+    buffer_var4 = 1 - pow(buffer_var1,8)
+    k1 = buffer_var2 + (buffer_var3 * buffer_var4)
+    kw = k1 * 0.581 * math.exp(0.0365 * temperature)
+    m = Ew - (Ew - m0) * pow(10,-kd)
+if int(Ed) >= int(m0) & int(m0) >= int(Ew):
+    m = m0
+# Compute F
+F = 59.9 * (250 - m) / (147.2 + m)
+print ("F=",F)
 
 #Code 2
 #Duff Moisture Code (DMC)
@@ -214,6 +249,12 @@ elif buffer_R>10:
 # U - build up index (BUI)
 # P - DMC
 # D - DC
+if P <= (0.4 * D):
+    U = (0.8 * P * D)/(P + 0.4*D)
+else:
+    buffer_var1 = pow(0.0114 * P,1.7)
+    U = P - (1 - (0.8*D)/(P + (0.4 *D))) * (0.92 + buffer_var1)
+
 
 
 
@@ -225,8 +266,20 @@ elif buffer_R>10:
 # U - build up index (BUI)
 # B - FWI (intermediate form)
 # S - FWI (form final)
-
-
+# Compute f(D)
+if U <= 80:
+    fD = (0.626 * pow(U,0.809)) + 2
+else:
+    fD = 1000/(25 + (108.64*math.exp(-0.023*U)))
+# Compute B
+B = 0.1 * R * fD
+# Compute S
+if B > 1:
+    buffer_var1 = 0.434 * math.log(B)
+    buffer_var2 = pow (buffer_var1, 0.647)
+    S =  math.exp(2.72 * buffer_var2)
+else:
+    S = B
 
 ##################################################################################
 # Finish Resultats
@@ -240,7 +293,7 @@ elif buffer_R>10:
 
 
 print("Fire Risk is")
-S = 0
+#S = 0
 if S <= 1:
     print("FWI=",S)
     print("Very Low Risk")
