@@ -19,9 +19,13 @@ while 1:
     # starting initialization
     
     while counter == 1:
-        F0 = 10
-        rf = 0.1
+        print("Initialization")
         counter = 0
+        F0 = 1
+        rf = 0.1
+        P0 = 1
+        m = 1.0 #Water content in fine fuel after the drainage
+        
     print ("FFMC of the previous day (F0) = {0:4.2f}".format(F0))
     ##############################################################################
     # Time
@@ -138,7 +142,6 @@ while 1:
     # Pr - DMC after the rain
     # P - DMC
 
-    P0 = 10 #Код 2 от предишния ден
     if daily_rain > 1.5:
         re = (0.92*daily_rain)-1.27
     else:
@@ -174,6 +177,7 @@ while 1:
     K = 1.894*(temperature+1.1)*(100-humidity)*Le*pow(10,-6)
     P = P0 + 100*K
     print("Code 2 Duff Moisture P = {0:4.2f}".format(P))
+    P0 = P
     #if float(P) >= 30 & float(P) <= 39:
     #    print("сухо")
     #elif float(P)>=40:
@@ -230,9 +234,8 @@ while 1:
     pow_wf = (0.05039*wind_speed)
     #wf = pow(2.718281828459,pow_wf)
     wf = math.exp(pow_wf) #Compute wind-factor
-    print("Initial Spread Index Index 1 wf = {0:4.2f}".format(wf))
+    print("Initial Spread Index Index 1 Wind factor wf = {0:4.2f}".format(wf))
 
-    m = 1.0 #Water content in fine fuel after the drainage ???
     buffer_var1 = 91.9*math.exp((-0.1386*m))
     buffer_var2 = pow(m,5.31)
     buffer_var3 = pow(10,7)*4.93
@@ -262,7 +265,7 @@ while 1:
         U = (0.8 * P * D)/(P + 0.4*D)
     else:
         buffer_var1 = pow(0.0114 * P,1.7)
-        U = P - (1 - (0.8*D)/(P + (0.4 *D))) * (0.92 + buffer_var1)
+        U = P - ((1 - (0.8*D))/(P + (0.4 *D))) * (0.92 + buffer_var1)
 
 
 
@@ -278,8 +281,10 @@ while 1:
     # Compute f(D)
     if U <= 80:
         fD = (0.626 * pow(U,0.809)) + 2
+        print("If True Duff humidity factor (fD) = {0:4.2f}".format(fD))
     else:
         fD = 1000/(25 + (108.64*math.exp(-0.023*U)))
+        print("If False Duff humidity factor (fD) = {0:4.2f}".format(fD))
     # Compute B
     B = 0.1 * R * fD
     # Compute S
