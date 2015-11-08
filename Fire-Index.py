@@ -15,16 +15,21 @@ while 1:
     daily_rain = float(input("Daily rain, mm: "))
 
     #print (temperature,humidity,wind_speed,daily_rain)
-    #rf = 0.1 # Purvonachalna inicializaciq, no trqbwa da go mahna
     # starting initialization
     
     while counter == 1:
         print("Initialization")
         counter = 0
-        F0 = 1
+        #F0 = 1 #FFMC of the previous day
+        F0 = 88
         rf = 0.1
-        P0 = 1
+        #P0 = 1 #Duff Moisture Code of the previous day
+        P0 = 30
         m = 1.0 #Water content in fine fuel after the drainage
+        #D0 = 5 # DC of the previous day
+        D0 = 210
+        Ew = 0 #TEE (equilibrium water content) of fine fuel after moistening
+        kd = 0
         
     print ("FFMC of the previous day (F0) = {0:4.2f}".format(F0))
     ##############################################################################
@@ -40,7 +45,7 @@ while 1:
     Effective_daylengts = [9.5, 10.4, 11.5, 13.5, 14.5, 15.16, 14.83, 13.5, 12.5, 11.5, 9.66, 9.16]
     Le = Effective_daylengts [mon - 1]
     #print(Le)
-
+    #Le = 12.4
     ##############################################################################
     #Code 1
     #Fine Fuel Moisture Code (FFMC)
@@ -97,7 +102,7 @@ while 1:
 
     Ed = buffer_var1 + buffer_var2 +(buffer_var3 * buffer_var4)
     print("TEE (equilibrium water content) of fine fuel after the drainage (Ed) = {0:4.2f}".format(Ed))
-    Ew = 0 # Trqbva da se premahne!
+
     if m0 > Ed:
         buffer_var1 = pow(humidity/100,1.7)
         buffer_var2 = 0.0694*pow(wind_speed,0.5)
@@ -150,9 +155,9 @@ while 1:
     buffer_var4 = math.exp(5.6348-(0.023*P0))
     M0 = 20 + buffer_var4
     b = 0
-    if P0<=33:
+    if int(P0) <= 33:
         b = 100/(0.5+0.3*P0)
-    elif  P0>33 | P0<=65:
+    elif  int(P0) > 33 | int(P0) <= 65.0:
         b = 14 - 1.3*(math.log(P0))
     else:
         b = 6.2*(math.log(P0))-17.2
@@ -178,12 +183,6 @@ while 1:
     P = P0 + 100*K
     print("Code 2 Duff Moisture P = {0:4.2f}".format(P))
     P0 = P
-    #if float(P) >= 30 & float(P) <= 39:
-    #    print("сухо")
-    #elif float(P)>=40:
-    #    print("интензивно горене")
-    #else:
-    #    print("Няма опасност от интензивно горене")
 
     #############################################################
     #Drought Code (DC)
@@ -197,14 +196,14 @@ while 1:
     # Lf - effective day length DC, hours
     # D0 - DC of the previous day
     # Dr after the rain
-    # D
+    # D - Drought Code
     if daily_rain > 2.8:
         real_rain_code_3 = 0.83*daily_rain - 1.27
     else:
         real_rain_code_3 = daily_rain
 
     # Compute Equivalent humidity of Code 3 of previous day
-    D0=5 ## Temp value
+
     Q0 = 800*math.exp(-D0*0.0025) #Compute Equivalent humidity of Code 3 previos the rain
     Qr = Q0 + (3.937*real_rain_code_3) #Compute Equivalent humidity of Code 3 after the rain
     buffer_var7 = 800/Qr
@@ -221,7 +220,7 @@ while 1:
     if V < 0:
         V = 0
     D = D0 + 0.5 * V #Compute D in function of D0
-
+    D0 = D
 
     ##############################################################################
     #Intial Spread Index (ISI)
@@ -246,14 +245,6 @@ while 1:
     R = 0.208*wf*ffh #Index 1
 
     print("Initial Spread Index Index 1 R = {0:4.2f}".format(R))
-    #buffer_R = int(R)
-    #if buffer_R==0 | buffer_R==1:
-    #    print("Ниска степен на разпространение на пожар")
-    #elif buffer_R>=2 & buffer_R<= 10:
-    #    print("Висока степен от разпространение на пожар")
-    #elif buffer_R>10:
-    #    print("Изключително бърз темп на разпространение на пожари")
-
 
     ##################################################################################
     #Buildup Index (BUI)
@@ -266,8 +257,6 @@ while 1:
     else:
         buffer_var1 = pow(0.0114 * P,1.7)
         U = P - ((1 - (0.8*D))/(P + (0.4 *D))) * (0.92 + buffer_var1)
-
-
 
 
     ##################################################################################
@@ -303,7 +292,6 @@ while 1:
     #   High (9 - 16)
     #   Very High (17-29)
     #   Extreme (30+)
-    #S = 0
     if S <= 1:
         print("Fire Risk is Very Low")
     elif (S>1) & (S<=4):
@@ -317,6 +305,11 @@ while 1:
     else:
         print("Fire Risk is Extreme")
     print("Fire Weather Index (FWI)={0:4.2f}".format(S))
+    ###########
+    print ("FFMC = {0:4.2f}".format(F))
+    print("DMC = {0:4.2f}".format(P))
+    print ("DC = {0:4.2f}".format(D))    
+    ###########
     # EXIT While 
     stop_program = float(input("For Exit press 1 for continue press 2: "))
     if stop_program == 1:
